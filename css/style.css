@@ -21,27 +21,29 @@ body {
     width: auto;
     background: red;
     margin-right: 1rem;
+    border-radius: 10px;
 }
 
 .container-info {
 	position: fixed;
-	bottom: 0;
+	bottom: 0.5rem;
     top: 50%;
     left: 0.5rem;
     right: 50%;
     width: auto;
     background: yellow;
     margin-right: 1rem;
-    margin-top: 0.5rem
+    margin-top: 0.5rem;
+    border-radius: 10px;
 }
 
 .container-chart {
 	position: fixed;
-	bottom: 0;
+	bottom: 0.5rem;
     top: 4rem;
     left: : 50%;
     right: 0.5rem;
     width: 50%;
-    height: 100%;
     background: green;
+    border-radius: 10px;
 }
