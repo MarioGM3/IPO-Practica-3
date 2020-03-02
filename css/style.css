@@ -2,51 +2,46 @@ body {
 	background: #DCDCDC;
 }
 
-.title {
-	text-align: center;
+.icon-nav-bar {
+	width: 40px;
+    height: 40px;
+    margin-right: 10px;
 }
 
-.container {
-	height: 1000px;
-	width: 100%;
-	padding-top: 1rem;
+.nav-bar-title {
+	font-weight: bold;
 }
 
-.row {
-	width: 100%;
-	height: 50%;
-	display: flex;
+.container-map {
+	position: fixed;
+	bottom: 50%;
+    top: 4rem;
+    left: 0.5rem;
+    right: 50%;
+    width: auto;
+    background: red;
+    margin-right: 1rem;
 }
 
-.map {
-	height: 100%;
-	width: 50%;
-	text-align: center;
-	background: #7D7D7D;
+.container-info {
+	position: fixed;
+	bottom: 0;
+    top: 50%;
+    left: 0.5rem;
+    right: 50%;
+    width: auto;
+    background: yellow;
+    margin-right: 1rem;
+    margin-top: 0.5rem
 }
 
-.table {
-	height: 100%;
-	width: 50%;
-	text-align: center;
-	background: #4D4D4D;
-}
-
-.info {
-	height: 100%;
-	width: 100%;
-	text-align: center;
-	background: #3C3434;
-}
-
-#info-grap {
-	padding: 1rem;
-    background: #230404;
-    height: 80%;
-}
-
-#info-map {
-	padding: 1rem;
-    background: black;
-    height: 80%;
+.container-chart {
+	position: fixed;
+	bottom: 0;
+    top: 4rem;
+    left: : 50%;
+    right: 0.5rem;
+    width: 50%;
+    height: 100%;
+    background: green;
 }
