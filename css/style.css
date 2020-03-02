@@ -1,0 +1,52 @@
+body {
+	background: #DCDCDC;
+}
+
+.title {
+	text-align: center;
+}
+
+.container {
+	height: 1000px;
+	width: 100%;
+	padding-top: 1rem;
+}
+
+.row {
+	width: 100%;
+	height: 50%;
+	display: flex;
+}
+
+.map {
+	height: 100%;
+	width: 50%;
+	text-align: center;
+	background: #7D7D7D;
+}
+
+.table {
+	height: 100%;
+	width: 50%;
+	text-align: center;
+	background: #4D4D4D;
+}
+
+.info {
+	height: 100%;
+	width: 100%;
+	text-align: center;
+	background: #3C3434;
+}
+
+#info-grap {
+	padding: 1rem;
+    background: #230404;
+    height: 80%;
+}
+
+#info-map {
+	padding: 1rem;
+    background: black;
+    height: 80%;
+}
