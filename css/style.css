@@ -1,5 +1,5 @@
 body {
-	background: #DCDCDC;
+	background: #FFFFFF;
 }
 
 .icon-nav-bar {
@@ -7,43 +7,57 @@ body {
     height: 40px;
     margin-right: 10px;
 }
+.navbar {
+	background-color: #336699;
+}
+
+#navbar a {
+	color: #FFFFFF;
+}
 
 .nav-bar-title {
 	font-weight: bold;
 }
 
-.container-map {
-	position: fixed;
-	bottom: 50%;
+#container-map {
+    position: fixed;
+    bottom: 0.5rem;
     top: 4rem;
     left: 0.5rem;
     right: 50%;
     width: auto;
-    background: red;
-    margin-right: 1rem;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
-.container-info {
-	position: fixed;
-	bottom: 0.5rem;
-    top: 50%;
-    left: 0.5rem;
-    right: 50%;
-    width: auto;
-    background: yellow;
-    margin-right: 1rem;
-    margin-top: 0.5rem;
-    border-radius: 10px;
-}
-
-.container-chart {
+#container-info {
 	position: fixed;
 	bottom: 0.5rem;
     top: 4rem;
-    left: : 50%;
     right: 0.5rem;
-    width: 50%;
-    background: green;
-    border-radius: 10px;
+    left: 50%;
+    width: auto;
+
+}
+
+.svg-bubblechart {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    width: calc(100% - 1rem);
+    height: calc(100% - 1rem);
+    background: #C0C0C0;
+    border-radius: 5px;
+}
+
+.dropdown {
+    position: fixed;
+    right: 0.5rem;
+    z-index:999;
+}
+
+.dropdown-menu-right {
+    right: 0;
+    left: auto;
 }
