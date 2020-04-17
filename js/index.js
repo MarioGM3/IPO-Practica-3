@@ -2,7 +2,7 @@
 window.ViewPrototype = (function () {
 
 	function ViewPrototype(spainMapData, spainCropData) {
-		this.spainMapData = spainMapData;
+		this.spainMap = spainMapData;
 		this.data = spainCropData.data;
 		this.comunities = spainCropData.comunidades;
 		this.specifics = spainCropData.tipos_especificos;
@@ -12,32 +12,251 @@ window.ViewPrototype = (function () {
 	}
 
 	ViewPrototype.prototype.init = function () {
-		/* Se cre el menú con las diferentes zonas almacenadas en this.comunities */
+		/* Se crea el menú con las diferentes zonas almacenadas en this.comunities */
 
-		this.drawBarsChart();
+		this.drawMap();
+
+		this.drawBublesChart();
+		this.updateBubblesChart();
+		var thisApp = this;
 
 
-		this.updateBarsChart();
+		/* Dropdown menu */
+		var dropdownOptions = d3.select("#zones")
+            	.selectAll("div")
+            	.data(this.comunities)
+            		.enter()
+            			.append("div")
+            			.attr("class", "form-group")
+            			.append("div")
+            			.attr("class", "custom-control custom-radio");
+
+        dropdownOptions.append("input")
+            .attr("class", "custom-control-input")
+            .attr("type", "radio")
+            .attr("id", function (d, i) {
+                return "zone-" + createId(d);
+            })
+            .attr("name", "zone")
+            .attr("value", function (d, i) {
+                return d;
+            })
+            .on("change", function () {
+            	thisApp.zoneSelected = d3.select("input[name='zone']:checked").property("value");
+            	$("#dropdown-button").text(thisApp.zoneSelected + " ");
+            	thisApp.updateBubblesChart();
+
+            	    d3.selectAll(".zone").attr("fill", function (d, i) {
+			            var zonee = createId(d.properties.NAME_1);
+			            if (createId(zonee) === createId(thisApp.zoneSelected)) {
+			            	console.log("Es el mismo");
+			                return "#336699";
+			            } else {
+			                return "#C0C0C0";
+			            }
+			        });
+            });
+
+        dropdownOptions.append("label")
+            .attr("for", function (d, i) {
+                return "zone-" + createId(d);
+            })
+            .attr("class", "custom-control-label unselectable check-label")
+            .text(function (d) {
+                return d;
+            });
 
 	};
 
-	ViewPrototype.prototype.drawBarsChart = function () {
+
+	ViewPrototype.prototype.drawMap = function () {
+	//https://bl.ocks.org/murtra/raw/0bbe30780188756f3d11/
+	//https://gist.github.com/Contrastat/6fdeed1f017286ad4d89
+	//https://raw.githubusercontent.com/climboid/d3jsMaps/master/chapter-6/shapefiles/ESP_adm1.json
+		//Width and height
+		var thisApp = this;
+			var w = 700;
+			var h = 500;
+
+		var tooltip = d3.select('#container-map').append('div')
+            .attr('class', 'tooltip hidden');
+
+
+			//Define map projection
+      		var projection = d3.geoMercator()
+      			.scale(2500)
+      			.center([0, 38.5])
+
+      		var projectionCanarias = d3.geoMercator()
+	            .scale(2500)
+	            .center([-17, 33])
+
+			//Define path generator
+			var path = d3.geoPath()
+							 .projection(projection);
+
+			var path_canarias = d3.geoPath()
+            					.projection(projectionCanarias);
+
+			//Create SVG
+			var svg = d3.select("#container-map")
+						.append("svg")
+						.attr("class", "svg-map")
+						.attr("viewBox", "0 0 700 500")
+            			.attr("preserveAspectRatio", "xMidYMid meet")
+            			.on("click", function (d) {
+		                	thisApp.zoneSelected = null;
+		                	thisApp.updateBubblesChart();
+		                	$("#dropdown-button").text("España ");
+		                	d3.select("input[id='zone-espana']").property('checked', true);
+		                	d3.selectAll(".zone").attr("fill", function (d, i) {
+					            return "#C0C0C0"; 
+					        });
+		            	})
+		            	.on("mouseenter", function () {
+							d3.select(".tooltip").style("display", "block")
+		                        .style('left', (d3.event.pageX + 10) + 'px')
+		                        .style('top', d3.event.pageY + 'px')
+		                        .html("España");
+
+		            	})
+		            	.on("mouseleave", function () {
+							d3.select(".tooltip").style("display", "none");
+		            	})
+		            	.on("mousemove", function () {
+							d3.select(".tooltip").style("display", "block")
+		                        .style('left', (d3.event.pageX + 10) + 'px')
+		                        .style('top', d3.event.pageY + 'px');
+		            	});
+
+			
+				
+			svg.selectAll("path")
+				.data(this.spainMap.features)
+				.enter()
+				.append("path")
+				.attr("d", function (d, i) {
+		                if (d.properties.NAME_1 === "Islas Canarias") {
+		                    return path_canarias(d, i);
+		                }
+
+		                return path(d, i);
+		         })
+				.attr("class", function (d, i) {
+	                return createId(d.properties.NAME_1) + " zone";
+	            })
+				.attr("id", function (d, i) {
+                	return createId(d.properties.NAME_1);
+            	})
+				.attr("stroke", "black")
+            	.attr("fill", "#C0C0C0")
+	            .on("click", function () {
+	                thisApp.zoneSelected = d3.select(this).data()[0].properties.NAME_1;
+	                thisApp.updateBubblesChart();
+	                var idComunidad = createId(d3.select(this).data()[0].properties.NAME_1);
+	                d3.selectAll("#" + idComunidad).attr("fill", "#336699");
+
+	                d3.selectAll(".zone").attr("fill", function (d, i) {
+			            var zonee = createId(d.properties.NAME_1);
+			            if (createId(zonee) === createId(thisApp.zoneSelected)) {
+			            	console.log("Es el mismo");
+			                return "#336699";
+			            } else {
+			                return "#C0C0C0";
+			            }
+			        });
+
+			        d3.select("input[id='zone-"+createId(thisApp.zoneSelected)+"']").property('checked', true);
+
+	                $("#dropdown-button").text(d3.select(this).data()[0].properties.NAME_1 + " ");
+	                d3.event.stopPropagation();
+	            })
+            	.on("mouseenter", function () {
+                	var idComunidad = createId(d3.select(this).data()[0].properties.NAME_1);
+					d3.selectAll("#" + idComunidad).attr("fill", "#336699");
+					d3.select(".tooltip").style("display", "block")
+                        .style('left', (d3.event.pageX + 10) + 'px')
+                        .style('top', d3.event.pageY + 'px')
+                        .html(d3.select(this).data()[0].properties.NAME_1);
+
+            	})
+            	.on("mouseleave", function () {
+                	var idComunidad = createId(d3.select(this).data()[0].properties.NAME_1);
+                	if(d3.select(this).data()[0].properties.NAME_1 !== thisApp.zoneSelected) {
+                		d3.selectAll("#" + idComunidad).attr("fill", "#C0C0C0");
+                	}
+					d3.select(".tooltip").style("display", "none");
+					d3.select(".tooltip").html("España");
+            	});
+
+			
+        	svg.append("line")          // attach a line
+			    .style("stroke", "#336699")  // colour the line
+			    .style("stroke-width", 3)  // colour the line
+			    .attr("x1", 410)     // x position of the first end of the line
+			    .attr("y1", 425)      // y position of the first end of the line
+			    .attr("x2", 650)     // x position of the second end of the line
+			    .attr("y2", 425); 
+
+			svg.append("line")          // attach a line
+			    .style("stroke", "#336699")  // colour the line
+			    .style("stroke-width", 3)  // colour the line
+			    .attr("x1", 410)     // x position of the first end of the line
+			    .attr("y1", 425)      // y position of the first end of the line
+			    .attr("x2", 410)     // x position of the second end of the line
+			    .attr("y2", 550); 
+
+			svg.append("line")          // attach a line
+			    .style("stroke", "#336699")  // colour the line
+			    .style("stroke-width", 3)  // colour the line
+			    .attr("x1", 410)     // x position of the first end of the line
+			    .attr("y1", 550)      // y position of the first end of the line
+			    .attr("x2", 650)     // x position of the second end of the line
+			    .attr("y2", 550); 
+
+			    svg.append("line")          // attach a line
+			    .style("stroke", "#336699")  // colour the line
+			    .style("stroke-width", 3)  // colour the line
+			    .attr("x1", 650)     // x position of the first end of the line
+			    .attr("y1", 425)      // y position of the first end of the line
+			    .attr("x2", 650)     // x position of the second end of the line
+			    .attr("y2", 550);
+
+
+
+
+
+	};
+
+
+	ViewPrototype.prototype.drawBublesChart = function () {
 		var svg = d3.select("#container-info")
 			.append("svg")
 			.attr("class", "svg-bubblechart")
-			.attr("id", "bubblechart")
-			.attr("preserveAspectRatio", "xMidYMid meet");
+			.attr("id", "bubblechart");
 	};
 
-	ViewPrototype.prototype.processBarsChartData = function () {
+	ViewPrototype.prototype.processBubblesChartData = function () {
 		var datas = [];
 
 		var labels = this.generals;
 
+		console.log("Datos " + this.zoneSelected);
+
 		for(var zone in this.data) {
-			if(this.zoneSelected != null) {
-
-
+			if(this.zoneSelected != null && this.zoneSelected !== "Ceuta y Melilla") {
+				if(this.zoneSelected === zone){
+					for(var i = 0; i < this.data[zone].length; i++){
+						if(labels.includes(this.data[zone][i].cubierta)) {
+							datas.push({
+								"sector": this.data[zone][i].cubierta,
+								"Total": this.data[zone][i].total	
+							});
+								
+								
+						}
+					}
+				}
 
 			}else {
 				if(zone === "España") {
@@ -59,8 +278,8 @@ window.ViewPrototype = (function () {
 		return datas;
 	};
 
-	ViewPrototype.prototype.updateBarsChart = function () {
-		var datos = this.processBarsChartData();
+	ViewPrototype.prototype.updateBubblesChart = function () {
+		var datos = this.processBubblesChartData();
 		
 		dataset = {
             "children": datos
@@ -88,7 +307,7 @@ window.ViewPrototype = (function () {
         			.attr('width', '100%')
             		.attr('height', '100%')
 					.attr('viewBox', (margin.left + margin.right) + ' ' + (margin.bottom) + ' ' + diameter + ' ' + diameter)
-					.attr('preserveAspectRatio', 'xMinYMin meet');
+					.attr('preserveAspectRatio', 'xMinYMin meet').text("");
 
 
         var g = svg.append('g')
@@ -114,10 +333,15 @@ window.ViewPrototype = (function () {
             .append("g")
             .attr("class", "node")
             .attr("transform", function(d) {
-                return "translate(" + d.x + "," + d.y + ")";
+                return "translate(" + (d.x + 30) + "," + d.y + ")";
 
             }).on("click", function (d) {
                 alert(d.data.sector + ": " + d.data.Total.replace(",",".").replace(",",".") + " ha");
+
+            }).on("mouseenter", function () {
+                //console.log("Dentro de nodo, sombreando...");
+            }).on("mouseleave", function () {
+                //console.log("Saliendo de nodo, quitando sombreado...");
             });
 
 		node.append("circle")
@@ -132,14 +356,14 @@ window.ViewPrototype = (function () {
             .attr("dy", ".2em")
             .style("text-anchor", "middle")
             .text(function(d) {
-            	console.log("Nombre: " + d.data.sector.length + ", Radio: " + d.r);
-            	if(d.data.sector.length < (d.r / 3)){
-            		console.log("Nombre devuelto: " + d.data.sector);
-                	return d.data.sector;
-            	}else{
-            		console.log("Nombre devuelto cortado: " + d.data.sector.substring(0, d.r / 6) + "...");
-					return d.data.sector.substring(0, d.r / 6) + "...";
+            	if(d.data.sector){
+	            	if(d.data.sector.length < (d.r / 3)){
+	                	return d.data.sector;
+	            	}else{
+						return d.data.sector.substring(0, d.r / 6) + "...";
+	            	}
             	}
+            	return "";
             })
             .attr("font-family", "sans-serif")
             .attr("font-size", function(d){
@@ -152,7 +376,11 @@ window.ViewPrototype = (function () {
             .attr("dy", "1.3em")
             .style("text-anchor", "middle")
             .text(function(d) {
+            	if(d.data){
                 return d.data.Total.replace(",",".").replace(",",".") + " ha";
+            	}else {
+            		return "";
+            	}
             })
             .attr("font-family",  "Gill Sans", "Gill Sans MT")
             .attr("font-size", function(d){
@@ -170,14 +398,46 @@ window.ViewPrototype = (function () {
 
 
 
+
+
 	return ViewPrototype;
 })();
 
+
+window.createId = function(cadena) {
+	var result;
+
+	result = normalize(cadena.trim().toLowerCase().replace(/ /g, ""));
+
+	return result;
+};
+
+var normalize = (function() {
+  var from = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç", 
+      to   = "AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuunncc",
+      mapping = {};
+ 
+  for(var i = 0, j = from.length; i < j; i++ )
+      mapping[ from.charAt( i ) ] = to.charAt( i );
+ 
+  return function( str ) {
+      var ret = [];
+      for( var i = 0, j = str.length; i < j; i++ ) {
+          var c = str.charAt( i );
+          if( mapping.hasOwnProperty( str.charAt( i ) ) )
+              ret.push( mapping[ c ] );
+          else
+              ret.push( c );
+      }      
+      return ret.join( '' );
+  }
+ 
+})();
 
 /* El evento se dispara cuando la página terminada de cargar */
 window.onload = function() {
   console.log("Página cargada");
 
-  window.Application = new ViewPrototype(SpanishCropsData, SpanishCropsData);
+  window.Application = new ViewPrototype(SpainMapData, SpanishCropsData);
   Application.init();
 };
