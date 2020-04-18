@@ -421,7 +421,14 @@ window.ViewPrototype = (function () {
 
 	ViewPrototype.prototype.showDataModal = function (generalType, area) {
 
-		$("#modal-title").text(generalType);
+		var zone = "";
+		if(this.zoneSelected != null) {
+			zone += this.zoneSelected + ": ";
+		}else {
+			zone += "España: ";
+		}
+
+		$("#modal-title").text(zone + generalType);
 		$("#area").text("Superficie total: " +area);
 
 
