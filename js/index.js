@@ -230,6 +230,10 @@ window.ViewPrototype = (function () {
 
 
 	ViewPrototype.prototype.drawBublesChart = function () {
+		
+		var tooltip = d3.select('#container-info').append('div')
+            .attr('class', 'tooltip2 hidden');
+
 		var svg = d3.select("#container-info")
 			.append("svg")
 			.attr("class", "svg-bubblechart")
@@ -342,11 +346,22 @@ window.ViewPrototype = (function () {
             	thisApp.showDataModal(d.data.sector, d.data.Total.replace(/,/g,".") + " ha");
             })
             .on("mouseenter", function (d, i) {
-				d3.selectAll(createId("#circle-" + d.data.sector)).style("opacity", "0.7");
+				d3.selectAll(createId("#circle-" + d.data.sector)).style("opacity", "0.7");   
+
+				d3.select(".tooltip2").style("display", "block")
+                        .style('left', (d3.event.pageX + 10) + 'px')
+                        .style('top', d3.event.pageY + 'px')
+                        .html(d.data.sector);   	
             })
             .on("mouseleave", function (d, i) {
                 d3.selectAll(createId("#circle-" + d.data.sector)).style("opacity", "1");
-            });
+                d3.select(".tooltip2").style("display", "none");
+            })
+            .on("mousemove", function () {
+							d3.select(".tooltip2").style("display", "block")
+		                        .style('left', (d3.event.pageX + 10) + 'px')
+		                        .style('top', d3.event.pageY + 'px');
+		    });
 
 		node.append("circle")
 		    .style("stroke", "#9E9E9E")  // colour the line
