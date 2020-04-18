@@ -281,6 +281,8 @@ window.ViewPrototype = (function () {
 	ViewPrototype.prototype.updateBubblesChart = function () {
 		var datos = this.processBubblesChartData();
 		
+		var thisApp = this;
+
 		dataset = {
             "children": datos
         };
@@ -317,7 +319,7 @@ window.ViewPrototype = (function () {
         var nodes = d3.hierarchy(dataset)
             .sum(function(d) {
             	if(d.Total != undefined){
-            		return d.Total.replace(",","").replace(",",""); 
+            		return d.Total.replace(/,/g,""); 
             	}else {
             		return 0;
             	}
@@ -335,16 +337,23 @@ window.ViewPrototype = (function () {
             .attr("transform", function(d) {
                 return "translate(" + (d.x + 30) + "," + d.y + ")";
 
-            }).on("click", function (d) {
-                alert(d.data.sector + ": " + d.data.Total.replace(",",".").replace(",",".") + " ha");
-
-            }).on("mouseenter", function () {
-                //console.log("Dentro de nodo, sombreando...");
-            }).on("mouseleave", function () {
-                //console.log("Saliendo de nodo, quitando sombreado...");
+            })
+            .on("click", function (d) {
+            	thisApp.showDataModal(d.data.sector, d.data.Total.replace(/,/g,".") + " ha");
+            })
+            .on("mouseenter", function (d, i) {
+				d3.selectAll(createId("#circle-" + d.data.sector)).style("opacity", "0.7");
+            })
+            .on("mouseleave", function (d, i) {
+                d3.selectAll(createId("#circle-" + d.data.sector)).style("opacity", "1");
             });
 
 		node.append("circle")
+		    .style("stroke", "#9E9E9E")  // colour the line
+			.style("stroke-width", 1)  // colour the line
+			.attr("id", function (d, i) {
+                	return createId("circle-" + d.data.sector);
+            })
             .attr("r", function(d) {
                 return d.r;
             })
@@ -377,7 +386,7 @@ window.ViewPrototype = (function () {
             .style("text-anchor", "middle")
             .text(function(d) {
             	if(d.data){
-                return d.data.Total.replace(",",".").replace(",",".") + " ha";
+                return d.data.Total.replace(/,/g,".") + " ha";
             	}else {
             		return "";
             	}
@@ -395,7 +404,16 @@ window.ViewPrototype = (function () {
 	};
 
 
+	ViewPrototype.prototype.showDataModal = function (generalType, area) {
 
+		$("#modal-title").text(generalType);
+		$("#area").text("Superficie total: " +area);
+
+
+
+
+		$("#modalData").modal("show");
+	};
 
 
 

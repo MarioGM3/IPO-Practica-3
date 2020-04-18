@@ -26,8 +26,11 @@
 
 	<body>
 		<nav id="navbar" class="navbar navbar-expand-lg navbar-light">
-			<img class="d-inline-block align-top icon-nav-bar" src="images/favicon.png"  alt="icon">
-  			<a href="#" class="navbar-brand nav-bar-title">Superficies y cultivos - España (2019)</a>
+  			
+  			<a href="#" class="navbar-brand nav-bar-title">
+  				<img class="d-inline-block align-top icon-nav-bar" src="images/favicon.png"  alt="icon">
+				<span class="main-title">Superficies y cultivos - España (2019)</span>
+			</a>
 
 	  		<div class="dropdown">
 				<a id="dropdown-button" class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -51,5 +54,28 @@
 		</div>
 		<div id="container-info">
 		</div>
+
+
+
+		<!-- Modal -->
+		<div class="modal fade" id="modalData" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  	<div class="modal-dialog" role="document">
+		   		<div class="modal-content">
+				    <div class="modal-header">
+				        <h5 class="modal-title" id="modal-title">Superficie forestal</h5>
+				        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				          <span aria-hidden="true">&times;</span>
+				        </button>
+					</div>
+			      	<div class="modal-body">
+			      		<span id="area">Superficie total: 0 ha </span>
+			      		<div id="datos-especificos">
+
+			      		</div>
+			      	</div>
+		    	</div>
+		  	</div>
+		</div>
+
 	</body>
 </html>

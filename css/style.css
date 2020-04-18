@@ -7,9 +7,15 @@ body {
     height: 40px;
     margin-right: 10px;
 }
+
 .navbar {
 	background-color: #336699;
 }
+
+.main-title {
+    vertical-align: middle;
+}
+
 
 #navbar a {
 	color: #FFFFFF;
@@ -133,4 +139,28 @@ body {
 
 .custom-control-label {
     cursor: pointer;
+}
+
+@media (max-width: 775px) {
+    #dropdown-button {
+        display: none !important;
+    }
+}
+
+.modal {
+    top: 2rem;
+}
+
+.modal-dialog {
+    max-width: 75% !important;
+    margin: 0 auto;
+    margin-top: 35px;
+}
+
+#datos-especificos {
+    background: #C0C0C0;
+    height: 550px;
+    margin-top: 15px;
+    border: 5px solid #C0C0C0;
+    border-radius: 5px;
 }
