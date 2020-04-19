@@ -20,7 +20,6 @@ window.ViewPrototype = (function () {
 		this.updateBubblesChart();
 
 		this.drawDonutChart();
-		this.updateDonutChart();
 
 		var thisApp = this;
 
@@ -82,7 +81,47 @@ window.ViewPrototype = (function () {
             		//https://www.d3-graph-gallery.com/graph/donut_label.html
 	};
 
-	ViewPrototype.prototype.updateDonutChart = function () {
+	ViewPrototype.prototype.processDonutChartData = function (datos) {
+
+		var result = [];
+		for (var name in datos) {
+		    if(datos[name] < 15) {
+		    	result.push(name);
+		    }
+		}
+
+		return result;
+	};
+
+	ViewPrototype.prototype.updateDonutChart = function (datos) {
+		
+		var totalHA = 0;
+		var domain = [];
+		for (var name in datos) {
+		    totalHA += datos[name];
+		    domain.push(name);
+		}
+
+		var percentages = {};
+		for (var name in datos) {
+		    percentages[name] = ((datos[name] * 100) / totalHA);
+		}
+
+		var result = this.processDonutChartData(percentages);
+		console.log("Eliminar: " + result);
+		var joinData = 0;
+		var data = datos;
+		for(var i=0; i< result.length; i++) {
+			joinData += data[result[i]];
+			delete data[result[i]];
+		}
+
+		if(joinData > 0){
+			data["OTROS"] = joinData;
+		}
+
+		console.log(data);
+
 		// set the dimensions and margins of the graph
 			var width = 1200
 			    height = 590
@@ -91,16 +130,20 @@ window.ViewPrototype = (function () {
 			// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
 			var radius = Math.min(width, height) / 2 - margin
 
-			var svg = d3.select("#donutchart");
+			var svg = d3.select("#donutchart")
+        			.attr('width', '100%')
+            		.attr('height', '100%')
+            		.attr("viewBox", "0 0 1200 590")
+            		.attr("preserveAspectRatio", "xMidYMid meet").text("");
+
 			svg = svg.append('g')
                 .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')');
 
-			// Create dummy data
-			var data = {a: 9, b: 20, c:30, d:8, e:12, f:3, g:7, h:14}
+            
 
 			// set the color scale
 			var color = d3.scaleOrdinal()
-			  .domain(["a", "b", "c", "d", "e", "f", "g", "h"])
+			  .domain(domain)
 			  .range(d3.schemeDark2);
 
 			// Compute the position of each group on the pie:
@@ -119,6 +162,7 @@ window.ViewPrototype = (function () {
 			  .innerRadius(radius * 0.9)
 			  .outerRadius(radius * 0.9)
 
+
 			// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
 			svg
 			  .selectAll('allSlices')
@@ -128,7 +172,7 @@ window.ViewPrototype = (function () {
 			  .attr('d', arc)
 			  .attr('fill', function(d){ return(color(d.data.key)) })
 			  .attr("stroke", "white")
-			  .style("stroke-width", "2px")
+			  .style("stroke-width", "1px")
 			  .style("opacity", 0.7)
 
 			// Add the polylines between chart and labels:
@@ -146,6 +190,7 @@ window.ViewPrototype = (function () {
 			      var posC = outerArc.centroid(d); // Label position = almost the same as posB
 			      var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2 // we need the angle to see if the X position will be at the extreme right or extreme left
 			      posC[0] = radius * 0.95 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
+			      
 			      return [posA, posB, posC]
 			    })
 
@@ -155,13 +200,14 @@ window.ViewPrototype = (function () {
 			  .data(data_ready)
 			  .enter()
 			  .append('text')
-			    .text( function(d) { console.log(d.data.key) ; return d.data.key + ": " + d.data.value + "%"} )
+			    .text( function(d) { return d.data.key + " (" + ((d.data.value * 100) / totalHA).toFixed(2) + "%)"})  //  + ": " + d.data.value + " ha (" + ((d.data.value * 100) / totalHA).toFixed(2) + "%)"
 			    .attr('transform', function(d) {
 			        var pos = outerArc.centroid(d);
 			        var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
 			        pos[0] = radius * 0.99 * (midangle < Math.PI ? 1 : -1);
 			        return 'translate(' + pos + ')';
 			    })
+			    .style('font-weight', 'bold')
 			    .style('text-anchor', function(d) {
 			        var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
 			        return (midangle < Math.PI ? 'start' : 'end')
@@ -532,7 +578,39 @@ window.ViewPrototype = (function () {
 		$("#area").text("Superficie total: " +area);
 
 
+		//Tengo que buscar los datos de esa comunidad y del dato general los subtipos con los valores
+		var data = {};
 
+		for(var i = 0; i < this.specifics.length; i++) {
+			if(this.specifics[i].tipo_general === generalType) {
+				data[this.specifics[i].nombre] = 0;
+			}
+		}
+		
+		var temp = "";
+		if(this.zoneSelected != null) {
+			temp += this.zoneSelected;
+		}else {
+			temp += "España";
+		}
+
+		for(var zone in this.data) {
+			if(zone === temp) {
+				console.log("La zona es: " + zone);
+				console.log("El tipo general es: " + generalType);
+				for(var i = 0; i < this.data[zone].length; i++){
+					if(data[this.data[zone][i].cubierta] !== undefined) {
+						data[this.data[zone][i].cubierta] = parseInt(this.data[zone][i].total.replace(/,/g,""));
+					}
+				}
+			}
+		}
+
+
+
+
+
+		this.updateDonutChart(data);
 
 		$("#modalData").modal("show");
 	};

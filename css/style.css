@@ -166,15 +166,14 @@ body {
 }
 
 .modal-dialog {
-    max-width: 75% !important;
+    max-width: 85% !important;
     margin: 0 auto;
     margin-top: 35px;
 }
 
 #datos-especificos {
-    background: #C0C0C0;
     height: 700px;
     margin-top: 15px;
-    border: 5px solid #C0C0C0;
+    border: 5px solid #336699;
     border-radius: 5px;
 }
