@@ -96,10 +96,8 @@ window.ViewPrototype = (function () {
 	ViewPrototype.prototype.updateDonutChart = function (datos) {
 		
 		var totalHA = 0;
-		var domain = [];
 		for (var name in datos) {
 		    totalHA += datos[name];
-		    domain.push(name);
 		}
 
 		var percentages = {};
@@ -120,7 +118,10 @@ window.ViewPrototype = (function () {
 			data["OTROS"] = joinData;
 		}
 
-		console.log(data);
+		var domain = [];
+		for (var name in data) {
+		    domain.push(name);
+		}
 
 		// set the dimensions and margins of the graph
 			var width = 1200
