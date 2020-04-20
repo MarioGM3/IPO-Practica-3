@@ -12,8 +12,6 @@ window.ViewPrototype = (function () {
 	}
 
 	ViewPrototype.prototype.init = function () {
-		/* Se crea el menú con las diferentes zonas almacenadas en this.comunities */
-
 		this.drawMap();
 
 		this.drawBublesChart();
@@ -24,7 +22,7 @@ window.ViewPrototype = (function () {
 		var thisApp = this;
 
 
-		/* Dropdown menu */
+		/* Se crea el menú con las diferentes zonas almacenadas en this.comunities */
 		var dropdownOptions = d3.select("#zones")
             	.selectAll("div")
             	.data(this.comunities)
@@ -77,8 +75,6 @@ window.ViewPrototype = (function () {
 			  		.attr("id", "donutchart")
 					.attr("viewBox", "0 0 1200 590")
             		.attr("preserveAspectRatio", "xMidYMid meet");
-
-            		//https://www.d3-graph-gallery.com/graph/donut_label.html
 	};
 
 	ViewPrototype.prototype.processDonutChartData = function (datos) {
@@ -106,7 +102,6 @@ window.ViewPrototype = (function () {
 		}
 
 		var result = this.processDonutChartData(percentages);
-		console.log("Eliminar: " + result);
 		var joinData = 0;
 		var data = datos;
 		for(var i=0; i< result.length; i++) {
@@ -123,12 +118,12 @@ window.ViewPrototype = (function () {
 		    domain.push(name);
 		}
 
-		// set the dimensions and margins of the graph
+		// Dimensiones y márgenes
 			var width = 1200
 			    height = 590
 			    margin = 40
 
-			// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+			// El radio del gráfico es la mitad de la anchura o la mitad de la altura (el más pequeño). Se resta un poco de margen.
 			var radius = Math.min(width, height) / 2 - margin
 
 			var svg = d3.select("#donutchart")
@@ -142,29 +137,28 @@ window.ViewPrototype = (function () {
 
             
 
-			// set the color scale
+			// Se establece la escala de color
 			var color = d3.scaleOrdinal()
 			  .domain(domain)
 			  .range(d3.schemeDark2);
 
-			// Compute the position of each group on the pie:
+			// Calcula la posición de cada grupo en el gráfico:
 			var pie = d3.pie()
 			  .sort(null) // Do not sort group by size
 			  .value(function(d) {return d.value; })
 			var data_ready = pie(d3.entries(data))
 
-			// The arc generator
+			// El generador de arco
 			var arc = d3.arc()
-			  .innerRadius(radius * 0.5)         // This is the size of the donut hole
+			  .innerRadius(radius * 0.5)         // // Este es el tamaño del agujero de la rosquilla
 			  .outerRadius(radius * 0.8)
 
-			// Another arc that won't be drawn. Just for labels positioning
+			// Otro arco que no se dibujará. Sólo para el posicionamiento de las etiquetas
 			var outerArc = d3.arc()
 			  .innerRadius(radius * 0.9)
 			  .outerRadius(radius * 0.9)
 
 
-			// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
 			svg
 			  .selectAll('allSlices')
 			  .data(data_ready)
@@ -176,7 +170,6 @@ window.ViewPrototype = (function () {
 			  .style("stroke-width", "1px")
 			  .style("opacity", 0.7)
 
-			// Add the polylines between chart and labels:
 			svg
 			  .selectAll('allPolylines')
 			  .data(data_ready)
@@ -186,22 +179,21 @@ window.ViewPrototype = (function () {
 			    .style("fill", "none")
 			    .attr("stroke-width", 1)
 			    .attr('points', function(d) {
-			      var posA = arc.centroid(d) // line insertion in the slice
-			      var posB = outerArc.centroid(d) // line break: we use the other arc generator that has been built only for that
-			      var posC = outerArc.centroid(d); // Label position = almost the same as posB
-			      var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2 // we need the angle to see if the X position will be at the extreme right or extreme left
-			      posC[0] = radius * 0.95 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
+			      var posA = arc.centroid(d); 
+			      var posB = outerArc.centroid(d); 
+			      var posC = outerArc.centroid(d); 
+			      var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2;
+			      posC[0] = radius * 0.95 * (midangle < Math.PI ? 1 : -1);
 			      
 			      return [posA, posB, posC]
 			    })
 
-			// Add the polylines between chart and labels:
 			svg
 			  .selectAll('allLabels')
 			  .data(data_ready)
 			  .enter()
 			  .append('text')
-			    .text( function(d) { return d.data.key + " (" + ((d.data.value * 100) / totalHA).toFixed(2) + "%)"})  //  + ": " + d.data.value + " ha (" + ((d.data.value * 100) / totalHA).toFixed(2) + "%)"
+			    .text( function(d) { return d.data.key + ": " + d.data.value + " ha" + " (" + ((d.data.value * 100) / totalHA).toFixed(2) + "%)"})  
 			    .attr('transform', function(d) {
 			        var pos = outerArc.centroid(d);
 			        var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
@@ -217,35 +209,29 @@ window.ViewPrototype = (function () {
 
 
 	ViewPrototype.prototype.drawMap = function () {
-	//https://bl.ocks.org/murtra/raw/0bbe30780188756f3d11/
-	//https://gist.github.com/Contrastat/6fdeed1f017286ad4d89
-	//https://raw.githubusercontent.com/climboid/d3jsMaps/master/chapter-6/shapefiles/ESP_adm1.json
-		//Width and height
+
 		var thisApp = this;
-			var w = 700;
-			var h = 500;
+		var w = 700;
+		var h = 500;
 
 		var tooltip = d3.select('#container-map').append('div')
             .attr('class', 'tooltip hidden');
 
 
-			//Define map projection
       		var projection = d3.geoMercator()
       			.scale(2500)
-      			.center([0, 38.5])
+      			.center([0, 39])
 
       		var projectionCanarias = d3.geoMercator()
 	            .scale(2500)
 	            .center([-17, 33])
 
-			//Define path generator
 			var path = d3.geoPath()
 							 .projection(projection);
 
 			var path_canarias = d3.geoPath()
             					.projection(projectionCanarias);
 
-			//Create SVG
 			var svg = d3.select("#container-map")
 						.append("svg")
 						.attr("class", "svg-map")
@@ -337,42 +323,38 @@ window.ViewPrototype = (function () {
             	});
 
 			
-        	svg.append("line")          // attach a line
-			    .style("stroke", "#336699")  // colour the line
-			    .style("stroke-width", 3)  // colour the line
-			    .attr("x1", 410)     // x position of the first end of the line
-			    .attr("y1", 425)      // y position of the first end of the line
-			    .attr("x2", 650)     // x position of the second end of the line
+			//Recuadro de las Islas Canarias
+        	svg.append("line")          
+			    .style("stroke", "#336699")  
+			    .style("stroke-width", 3)  
+			    .attr("x1", 410)     
+			    .attr("y1", 425)      
+			    .attr("x2", 650)    
 			    .attr("y2", 425); 
 
-			svg.append("line")          // attach a line
-			    .style("stroke", "#336699")  // colour the line
-			    .style("stroke-width", 3)  // colour the line
-			    .attr("x1", 410)     // x position of the first end of the line
-			    .attr("y1", 425)      // y position of the first end of the line
-			    .attr("x2", 410)     // x position of the second end of the line
+			svg.append("line")         
+			    .style("stroke", "#336699")  
+			    .style("stroke-width", 3)  
+			    .attr("x1", 410)    
+			    .attr("y1", 425)      
+			    .attr("x2", 410)     
 			    .attr("y2", 550); 
 
-			svg.append("line")          // attach a line
-			    .style("stroke", "#336699")  // colour the line
-			    .style("stroke-width", 3)  // colour the line
-			    .attr("x1", 410)     // x position of the first end of the line
-			    .attr("y1", 550)      // y position of the first end of the line
-			    .attr("x2", 650)     // x position of the second end of the line
+			svg.append("line")          
+			    .style("stroke", "#336699")  
+			    .style("stroke-width", 3)  
+			    .attr("x1", 410)     
+			    .attr("y1", 550)      
+			    .attr("x2", 650)    
 			    .attr("y2", 550); 
 
-			    svg.append("line")          // attach a line
-			    .style("stroke", "#336699")  // colour the line
-			    .style("stroke-width", 3)  // colour the line
-			    .attr("x1", 650)     // x position of the first end of the line
-			    .attr("y1", 425)      // y position of the first end of the line
-			    .attr("x2", 650)     // x position of the second end of the line
+			    svg.append("line")          
+			    .style("stroke", "#336699")  
+			    .style("stroke-width", 3)  
+			    .attr("x1", 650)     
+			    .attr("y1", 425)      
+			    .attr("x2", 650)    
 			    .attr("y2", 550);
-
-
-
-
-
 	};
 
 
@@ -511,8 +493,8 @@ window.ViewPrototype = (function () {
 		    });
 
 		node.append("circle")
-		    .style("stroke", "#9E9E9E")  // colour the line
-			.style("stroke-width", 1)  // colour the line
+		    .style("stroke", "#9E9E9E") 
+			.style("stroke-width", 1) 
 			.attr("id", function (d, i) {
                 	return createId("circle-" + d.data.sector);
             })
@@ -607,10 +589,6 @@ window.ViewPrototype = (function () {
 			}
 		}
 
-
-
-
-
 		this.updateDonutChart(data);
 
 		$("#modalData").modal("show");
@@ -652,6 +630,7 @@ var normalize = (function() {
   }
  
 })();
+
 
 /* El evento se dispara cuando la página terminada de cargar */
 window.onload = function() {
